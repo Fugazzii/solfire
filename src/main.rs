@@ -1,10 +1,19 @@
+use solana_client::rpc_client;
+
 mod database;
+mod json_rpc_client;
+
 use database::{Database, Event};
 
-fn main() {
 
-    let db: Database<Event> = Database::new();
+const JSON_RPC_URL: &str = "https://api.devnet.solana.com/";
 
+#[tokio::main]
+async fn main() {
+    let _db: Database<Event> = Database::new();
 
-    println!("Hello, world!");
+    let client = rpc_client::RpcClient::new(JSON_RPC_URL);
+
+    let recent_blockhash = client.get_latest_blockhash().unwrap();
+    println!("Recent blockhash: {:?}", recent_blockhash);
 }
