@@ -1,46 +1,33 @@
-#[allow(unused_imports)]
 use rand_core;
 
-#[allow(unused_imports)]
-use solana_program::hash::Hash;
-#[allow(unused_imports)]
-use solana_program::instruction::AccountMeta;
-use solana_program::native_token::lamports_to_sol;
-#[allow(unused_imports)]
-use solana_program::native_token::sol_to_lamports;
-#[allow(unused_imports)]
-use solana_program::native_token::LAMPORTS_PER_SOL;
-#[allow(unused_imports)]
-use solana_program::pubkey::Pubkey;
-#[allow(unused_imports)]
-use solana_program::system_program;
+use solana_program::{
+    hash::Hash,
+    instruction::AccountMeta,
+    native_token::{lamports_to_sol, sol_to_lamports},
+    pubkey::Pubkey,
+    system_program,
+};
 
-#[allow(unused_imports)]
-use solana_client::client_error::ClientError;
-#[allow(unused_imports)]
-use solana_client::rpc_client::RpcClient;
-#[allow(unused_imports)]
-use solana_client::rpc_config::RpcSendTransactionConfig;
+use solana_client::{
+    rpc_client::RpcClient,
+    rpc_config::RpcSendTransactionConfig
+};
 
-#[allow(unused_imports)]
-use solana_sdk::signature::Keypair;
-#[allow(unused_imports)]
-use solana_sdk::signature::Signature;
-use solana_sdk::signature::{read_keypair_file, write_keypair_file};
-#[allow(unused_imports)]
-use solana_sdk::signer::Signer;
-#[allow(unused_imports)]
-use solana_sdk::system_instruction::create_account;
-#[allow(unused_imports)]
-use solana_sdk::transaction::Transaction;
+use solana_sdk::{
+    signature::{read_keypair_file, write_keypair_file, Keypair, Signature},
+    signer::{SeedDerivable, Signer},
+    system_instruction::create_account,
+    transaction::Transaction
+};
 
 pub struct SolanaClient {
     client: RpcClient,
-    pub admin: Keypair
+    admin: Keypair
 }
 
 #[allow(dead_code)]
 impl SolanaClient {
+    
     pub fn connect(url: &str) -> Self {
         SolanaClient {
             client: RpcClient::new(url),
@@ -91,7 +78,7 @@ impl SolanaClient {
             Ok(lamports) => {
                 let sols = lamports_to_sol(lamports);
                 sols
-            },
+            }
             Err(err) => panic!("Failed to retrieve balance. {:?}", err)
         }
     }
@@ -116,10 +103,7 @@ impl SolanaClient {
     }
 
     pub fn create_account(&self, passphrase: &str, file_name: &str) {
-        let keypair = Keypair::from_bytes(passphrase.as_bytes()).unwrap_or(
-            // Default keypair
-            Keypair::generate(&mut rand_core::OsRng)
-        );
+        let keypair = Keypair::from_bytes(passphrase.as_bytes()).unwrap_or(Keypair::new());
         let recent_blockhash = self.get_latest_hash();
         let lamports = sol_to_lamports(0.05);
         let space = 1024;

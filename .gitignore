@@ -1,3 +1,7 @@
 /target
 
 /wallets
+
+env/.env.dev
+env/.env.test
+env/.env.prod
