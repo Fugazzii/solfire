@@ -1,8 +1,13 @@
+/** External imports */
 use dotenv;
-
-mod solana_rpc_client;
-use solana_rpc_client::SolanaClient;
 use solana_sdk::signer::Signer;
+
+/** Local imports */
+mod infrastructure;
+use infrastructure::{
+    database::Database,
+    solana_rpc_client::SolanaClient
+};
 
 const ENV: &str = "./env/.env.dev"; 
 
@@ -10,6 +15,8 @@ const ENV: &str = "./env/.env.dev";
 async fn main() {
     dotenv::from_path(ENV).ok();
     
+    let db = Database::new();
+
     let rpc_url = dotenv::var("JSON_RPC_URL");
 
     let client = SolanaClient::connect(rpc_url.unwrap().as_str());
