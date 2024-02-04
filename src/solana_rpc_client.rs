@@ -2,7 +2,7 @@ use rand_core;
 use solana_program::{
 	hash::Hash, native_token::LAMPORTS_PER_SOL, system_program
 };
-use solana_client::{client_error::ClientError, rpc_client::RpcClient};
+use solana_client::{client_error::ClientError, rpc_client::RpcClient, rpc_config::RpcSendTransactionConfig};
 use solana_sdk::{
 	signature::{Keypair, Signature}, signer::Signer, system_instruction::create_account, transaction::Transaction
 };
@@ -19,8 +19,18 @@ impl SolanaClient {
 		}
 	}
 
-	pub fn perform_transaction(&self, tx: &Transaction) -> Result<Signature, ClientError>{
+	pub fn send_tx(&self, tx: &Transaction) -> Result<Signature, ClientError>{
 		self.client.send_and_confirm_transaction(tx)
+	}
+
+	pub fn send_tx_without_preflight(&self, tx: &Transaction) -> Result<Signature, ClientError> {
+	    let mut config: RpcSendTransactionConfig = RpcSendTransactionConfig::default();
+		config.skip_preflight = true;
+		let sx = self.client.send_transaction_with_config(
+			tx, 
+			config
+		);
+		sx
 	}
 
 	pub fn get_latest_hash(&self) -> Hash {

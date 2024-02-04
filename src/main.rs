@@ -1,3 +1,4 @@
+use solana_client::rpc_config::RpcSendTransactionConfig;
 use solana_program::{
     instruction::{AccountMeta, Instruction},
     pubkey::Pubkey
@@ -50,7 +51,16 @@ async fn main() {
         client.get_latest_hash()
     );
 
-    match client.perform_transaction(&tx) {
+    // match client.send_tx(&tx) {
+    //     Ok(sig) => {
+    //         println!("Signature: {}", sig);
+    //     }
+    //     Err(err) => {
+    //         println!("{:?}", err.get_transaction_error().unwrap());
+    //     }
+    // }
+
+    match client.send_tx_without_preflight(&tx) {
         Ok(sig) => {
             println!("Signature: {}", sig);
         }
@@ -58,6 +68,6 @@ async fn main() {
             println!("{:?}", err.get_transaction_error().unwrap());
         }
     }
-    
+
 
 }
