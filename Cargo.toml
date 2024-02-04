@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 rand = "0.8.5"
-rand_core = "*"
 tokio = { features = ["full"], version = "1" }
 solana-program = "*"
 solana-client = "*"

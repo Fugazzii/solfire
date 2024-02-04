@@ -1,5 +1,3 @@
-use rand_core;
-
 use solana_program::{
     hash::Hash,
     instruction::AccountMeta,
@@ -9,20 +7,20 @@ use solana_program::{
 };
 
 use solana_client::{
-    rpc_client::RpcClient,
+    rpc_client::RpcClient, 
     rpc_config::RpcSendTransactionConfig
 };
 
 use solana_sdk::{
     signature::{read_keypair_file, write_keypair_file, Keypair, Signature},
-    signer::{SeedDerivable, Signer},
+    signer::Signer,
     system_instruction::create_account,
     transaction::Transaction
 };
 
 pub struct SolanaClient {
     client: RpcClient,
-    admin: Keypair
+    pub admin: Keypair
 }
 
 #[allow(dead_code)]
@@ -83,6 +81,21 @@ impl SolanaClient {
         }
     }
 
+    pub fn get_all_txs(&self, pubkey: &Pubkey) -> Vec<String> {
+        match self.client.get_signatures_for_address(pubkey) {
+            Ok(txs) => {
+                let mut result: Vec<String> = vec![];
+
+                for tx in txs {
+                    result.push(tx.signature);
+                }
+
+                result
+            },
+            Err(err) => panic!("Failed to retrieve txs {:?}", err)
+        }
+    }
+
     pub fn airdrop(&self, pubkey: &Pubkey, sols: u32) -> Signature {
         let lamports = sol_to_lamports(sols as f64);
         match self.client.request_airdrop(pubkey, lamports) {
@@ -134,4 +147,5 @@ impl SolanaClient {
             }
         }
     }
+
 }
