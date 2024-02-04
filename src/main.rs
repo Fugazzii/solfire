@@ -25,6 +25,7 @@ async fn main() {
     let address_pk = Pubkey::new_unique();
     let system_id = Pubkey::default();
 
+
     // 42 lamports
     let instruction_data = &[2,0,0,0,42,0,0,0,0,0,0,0];
     let instruction_accounts = vec![
@@ -51,23 +52,8 @@ async fn main() {
         client.get_latest_hash()
     );
 
-    // match client.send_tx(&tx) {
-    //     Ok(sig) => {
-    //         println!("Signature: {}", sig);
-    //     }
-    //     Err(err) => {
-    //         println!("{:?}", err.get_transaction_error().unwrap());
-    //     }
-    // }
+    let sig = client.send_tx(&tx);
 
-    match client.send_tx_without_preflight(&tx) {
-        Ok(sig) => {
-            println!("Signature: {}", sig);
-        }
-        Err(err) => {
-            println!("{:?}", err.get_transaction_error().unwrap());
-        }
-    }
-
+    println!("Signature: {}", sig);
 
 }
