@@ -5,6 +5,7 @@ use rand_core;
 use solana_program::hash::Hash;
 #[allow(unused_imports)]
 use solana_program::instruction::AccountMeta;
+use solana_program::native_token::lamports_to_sol;
 #[allow(unused_imports)]
 use solana_program::native_token::sol_to_lamports;
 #[allow(unused_imports)]
@@ -35,7 +36,7 @@ use solana_sdk::transaction::Transaction;
 
 pub struct SolanaClient {
     client: RpcClient,
-    admin: Keypair
+    pub admin: Keypair
 }
 
 #[allow(dead_code)]
@@ -83,6 +84,16 @@ impl SolanaClient {
         let c: Hash = self.client.get_latest_blockhash().unwrap();
         println!("Recent blockhash: {:?}", c);
         c
+    }
+
+    pub fn get_balance(&self, pubkey: &Pubkey) -> f64 {
+        match self.client.get_balance(pubkey) {
+            Ok(lamports) => {
+                let sols = lamports_to_sol(lamports);
+                sols
+            },
+            Err(err) => panic!("Failed to retrieve balance. {:?}", err)
+        }
     }
 
     pub fn airdrop(&self, pubkey: &Pubkey, sols: u32) -> Signature {
