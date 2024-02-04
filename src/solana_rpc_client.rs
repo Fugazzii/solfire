@@ -2,30 +2,40 @@
 use rand_core;
 
 #[allow(unused_imports)]
-use solana_program::{
-    hash::Hash,
-    instruction::AccountMeta,
-    native_token::{sol_to_lamports, LAMPORTS_PER_SOL},
-    pubkey::Pubkey,
-    system_program,
-};
+use solana_program::hash::Hash;
+#[allow(unused_imports)]
+use solana_program::instruction::AccountMeta;
+#[allow(unused_imports)]
+use solana_program::native_token::sol_to_lamports;
+#[allow(unused_imports)]
+use solana_program::native_token::LAMPORTS_PER_SOL;
+#[allow(unused_imports)]
+use solana_program::pubkey::Pubkey;
+#[allow(unused_imports)]
+use solana_program::system_program;
 
 #[allow(unused_imports)]
-use solana_client::{
-    client_error::ClientError, rpc_client::RpcClient, rpc_config::RpcSendTransactionConfig,
-};
+use solana_client::client_error::ClientError;
+#[allow(unused_imports)]
+use solana_client::rpc_client::RpcClient;
+#[allow(unused_imports)]
+use solana_client::rpc_config::RpcSendTransactionConfig;
 
+#[allow(unused_imports)]
+use solana_sdk::signature::Keypair;
+#[allow(unused_imports)]
+use solana_sdk::signature::Signature;
 use solana_sdk::signature::{read_keypair_file, write_keypair_file};
 #[allow(unused_imports)]
-use solana_sdk::{
-    signature::{Keypair, Signature},
-    signer::Signer,
-    system_instruction::create_account,
-    transaction::Transaction,
-};
+use solana_sdk::signer::Signer;
+#[allow(unused_imports)]
+use solana_sdk::system_instruction::create_account;
+#[allow(unused_imports)]
+use solana_sdk::transaction::Transaction;
 
 pub struct SolanaClient {
     client: RpcClient,
+    admin: Keypair
 }
 
 #[allow(dead_code)]
@@ -33,18 +43,17 @@ impl SolanaClient {
     pub fn connect(url: &str) -> Self {
         SolanaClient {
             client: RpcClient::new(url),
+            admin: read_keypair_file("./wallets/w1.json").unwrap()
         }
     }
 
     pub fn read_keypair(&self, file_path: &str) -> Keypair {
         match read_keypair_file(file_path) {
             Ok(keypair) => keypair,
-            Err(err) => panic!("Failed to read keypair file. {:?}", err.to_string()),
+            Err(err) => {
+                panic!("Failed to read keypair file. {:?}", err.to_string())
+            }
         }
-    }
-
-    pub fn perform_tx(&self, signer: &Keypair, recipient_pubkey: &Pubkey, sols: u32) -> Signature {
-        unimplemented!()
     }
 
     pub fn send_tx(&self, tx: &Transaction) -> Signature {
@@ -83,7 +92,7 @@ impl SolanaClient {
                 println!("Airdropped 1 SOL\nSignature: {}", sig);
                 sig
             }
-            Err(err) => panic!("Failed to airdrop. {:?}", err),
+            Err(err) => panic!("Failed to airdrop. {:?}", err)
         }
     }
 
@@ -91,35 +100,33 @@ impl SolanaClient {
         AccountMeta {
             pubkey: *pubkey,
             is_signer,
-            is_writable: true,
+            is_writable: true
         }
     }
 
     pub fn create_account(&self, passphrase: &str, file_name: &str) {
         let keypair = Keypair::from_bytes(passphrase.as_bytes()).unwrap_or(
             // Default keypair
-            Keypair::generate(&mut rand_core::OsRng),
+            Keypair::generate(&mut rand_core::OsRng)
         );
         let recent_blockhash = self.get_latest_hash();
         let lamports = sol_to_lamports(0.05);
         let space = 1024;
         write_keypair_file(&keypair, format!("./wallets/{}.json", file_name)).unwrap();
 
-		let admin = self.read_keypair("./wallets/w1.json");
-
         let ix = create_account(
-			&admin.pubkey(),
+            &self.admin.pubkey(),
             &keypair.pubkey(),
             lamports,
             space,
-            &system_program::id(),
+            &system_program::id()
         );
 
         let tx = Transaction::new_signed_with_payer(
             &[ix],
-            Some(&admin.pubkey()),
-            &[&admin, &keypair],
-            recent_blockhash,
+            Some(&self.admin.pubkey()),
+            &[&self.admin],
+            recent_blockhash
         );
 
         let result = self.client.send_and_confirm_transaction(&tx);

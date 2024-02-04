@@ -1,0 +1,5 @@
+# rustfmt.toml
+
+trailing_comma = "Never"
+tab_spaces = 4
+imports_granularity = "Crate"

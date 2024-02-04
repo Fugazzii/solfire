@@ -12,3 +12,5 @@ tokio = { features = ["full"], version = "1" }
 solana-program = "*"
 solana-client = "*"
 solana-sdk = "*"
+
+[dev-dependencies]
