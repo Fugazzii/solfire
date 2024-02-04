@@ -3813,8 +3813,10 @@ name = "solfire"
 version = "0.1.0"
 dependencies = [
  "rand 0.8.5",
+ "rand_core 0.5.1",
  "solana-client",
  "solana-program",
+ "solana-sdk",
  "tokio",
 ]
 
