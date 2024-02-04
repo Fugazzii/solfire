@@ -95,32 +95,34 @@ impl SolanaClient {
         }
     }
 
-    pub fn create_wallet(&self, passphrase: &str, file_name: &str) {
+    pub fn create_account(&self, passphrase: &str, file_name: &str) {
         let keypair = Keypair::from_bytes(passphrase.as_bytes()).unwrap_or(
             // Default keypair
             Keypair::generate(&mut rand_core::OsRng),
         );
         let recent_blockhash = self.get_latest_hash();
-        let lamports = sol_to_lamports(1.0);
+        let lamports = sol_to_lamports(0.05);
         let space = 1024;
         write_keypair_file(&keypair, format!("./wallets/{}.json", file_name)).unwrap();
 
-        let create_account_instruction = create_account(
-            &keypair.pubkey(),
+		let admin = self.read_keypair("./wallets/w1.json");
+
+        let ix = create_account(
+			&admin.pubkey(),
             &keypair.pubkey(),
             lamports,
             space,
             &system_program::id(),
         );
 
-        let transaction = Transaction::new_signed_with_payer(
-            &[create_account_instruction],
-            Some(&keypair.pubkey()),
-            &[&keypair],
+        let tx = Transaction::new_signed_with_payer(
+            &[ix],
+            Some(&admin.pubkey()),
+            &[&admin, &keypair],
             recent_blockhash,
         );
 
-        let result = self.client.send_and_confirm_transaction(&transaction);
+        let result = self.client.send_and_confirm_transaction(&tx);
         match result {
             Ok(signature) => {
                 println!("Transaction confirmed. Signature: {:?}", signature);
