@@ -1,12 +1,10 @@
-use solana_client::rpc_config::RpcSendTransactionConfig;
 use solana_program::{
-    instruction::{AccountMeta, Instruction},
+    instruction::Instruction,
     pubkey::Pubkey
 };
+
 use solana_sdk::{
-    signature::Keypair,
-    signer::Signer,
-    transaction::Transaction
+    signature::read_keypair_file, signer::Signer, transaction::Transaction
 };
 
 mod solana_rpc_client;
@@ -17,37 +15,33 @@ const RPC_DEVNET_URL: &str = "https://api.devnet.solana.com/";
 #[tokio::main]
 async fn main() {    
 
+    let system_id: Pubkey = Pubkey::default();
+
     let client = SolanaClient::new(RPC_DEVNET_URL);
 
-    let keypair = Keypair::new();
+    let keypair1 = read_keypair_file("./wallets/w1.json").unwrap();
+    let keypair2 = read_keypair_file("./wallets/w2.json").unwrap();
 
-    let pubkey = keypair.pubkey();
-    let address_pk = Pubkey::new_unique();
-    let system_id = Pubkey::default();
-
+    let (pubkey1, pubkey2) = (keypair1.pubkey(), keypair2.pubkey());
+    let (sender, recipient) = (
+        client.describe_account(&pubkey1, true),
+        client.describe_account(&pubkey2, false)
+    );
 
     // 42 lamports
     let instruction_data = &[2,0,0,0,42,0,0,0,0,0,0,0];
-    let instruction_accounts = vec![
-        AccountMeta {
-            pubkey,
-            is_signer: true,
-            is_writable: true
-        },
-        AccountMeta {
-            pubkey: address_pk,
-            is_signer: false,
-            is_writable: true
-        }
-    ];
 
-    let ix = Instruction::new_with_bytes(system_id, instruction_data, instruction_accounts);
+    let ix = Instruction::new_with_bytes(
+        system_id,
+        instruction_data,
+        vec![sender, recipient]
+    );
     
-    let signers = [&keypair];
+    let signers = [&keypair1];
 
     let tx = Transaction::new_signed_with_payer(
         &[ix], 
-        Some(&pubkey), 
+        Some(&pubkey1), 
         &signers, 
         client.get_latest_hash()
     );

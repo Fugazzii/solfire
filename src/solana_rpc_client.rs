@@ -1,6 +1,6 @@
 use rand_core;
 use solana_program::{
-	hash::Hash, native_token::{sol_to_lamports, LAMPORTS_PER_SOL}, pubkey::Pubkey, system_program
+	hash::Hash, instruction::AccountMeta, native_token::{sol_to_lamports, LAMPORTS_PER_SOL}, pubkey::Pubkey, system_program
 };
 use solana_client::{client_error::ClientError, rpc_client::RpcClient, rpc_config::RpcSendTransactionConfig};
 use solana_sdk::{
@@ -55,6 +55,14 @@ impl SolanaClient {
 				sig
 			}
 			Err(err) => panic!("Failed to airdrop. {:?}", err)
+		}
+	}
+
+	pub fn describe_account(&self, pubkey: &Pubkey, is_signer: bool) -> AccountMeta {
+		AccountMeta {
+			pubkey: *pubkey,
+			is_signer,
+			is_writable: true 
 		}
 	}
 
