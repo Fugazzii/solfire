@@ -11,6 +11,8 @@ tokio = { features = ["full"], version = "1" }
 solana-program = "*"
 solana-client = "*"
 solana-sdk = "*"
-dotenv = "*"
 actix-web = "*"
+diesel = { version = "2.0.3", features = ["postgres", "r2d2", "chrono", "uuid"] }
+dotenvy = "0.15"
+env_logger = "0.10.0"
 serde = { version = "1.0", features = ["derive"] }

@@ -1,44 +1,18 @@
-use rand::Rng;
+use diesel::prelude::*;
+use diesel::r2d2::{self, ConnectionManager};
 
-#[derive(Debug)]
-pub enum EventType {
-    AccountCreated {
-        account_id: u32
-    },
-    WalletCreated {
-        wallet_id: u32
-    },
-    WalletDeleted {
-        wallet_id: u32
-    },
-    PerformedTransaction {
-        from_id: u32,
-        to_id: u32,
-        amount: u32
-    }
-}
+pub type DBPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
-#[derive(Debug)]
-pub struct Event {
-    id: u32,
-    event_type: EventType,
-}
-
-#[derive(Debug)]
 pub struct Database {
-    id: u32,
-    table: Vec<Event>,
+	pub pool: DBPool
 }
 
 impl Database {
-    pub fn new() -> Self {
-        Database {
-            id: rand::thread_rng().gen_range(10000..99999),
-            table: Vec::new()
-        }
-    }
-
-    pub fn add_event(&mut self, event: Event) {
-        self.table.push(event);
-    }
+	pub fn new(database_url: &String) -> Self {
+		let manager = ConnectionManager::<PgConnection>::new(database_url);
+        let pool: DBPool = r2d2::Pool::builder()
+            .build(manager)
+            .expect("Failed to create pool.");
+        Database { pool }
+	}
 }
