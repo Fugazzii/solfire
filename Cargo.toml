@@ -12,3 +12,5 @@ solana-program = "*"
 solana-client = "*"
 solana-sdk = "*"
 dotenv = "*"
+actix-web = "*"
+serde = { version = "1.0", features = ["derive"] }
