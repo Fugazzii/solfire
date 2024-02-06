@@ -65,7 +65,6 @@ impl SolanaClient {
 
     pub fn get_latest_hash(&self) -> Hash {
         let c: Hash = self.client.get_latest_blockhash().unwrap();
-        println!("Recent blockhash: {:?}", c);
         c
     }
 
@@ -94,8 +93,8 @@ impl SolanaClient {
         }
     }
 
-    pub fn airdrop(&self, pubkey: &Pubkey, sols: u32) -> Signature {
-        let lamports = sol_to_lamports(sols as f64);
+    pub fn airdrop(&self, pubkey: &Pubkey, sols: f64) -> Signature {
+        let lamports = sol_to_lamports(sols);
         match self.client.request_airdrop(pubkey, lamports) {
             Ok(sig) => {
                 println!("Airdropped 1 SOL\nSignature: {}", sig);
