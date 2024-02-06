@@ -7,7 +7,7 @@ use application::api::config;
 pub mod infrastructure;
 use infrastructure::{
     solana_rpc_client::SolanaClient,
-    database::Database
+    // database::Database
 };
 
 const ENV: &str = "./env/.env.dev"; 
@@ -21,7 +21,6 @@ async fn main() -> std::io::Result<()> {
     dotenvy::from_path(ENV).ok();
 
     // let db_url = dotenvy::var("DATABASE_URL").expect("Provide DATABASE_URL");
-	
     let factory = move || App::new()
         // .app_data(
         //     Data::new(
@@ -30,9 +29,7 @@ async fn main() -> std::io::Result<()> {
         // )
         .app_data(
             Data::new(
-                SolanaClient::connect(
-                    dotenvy::var("JSON_RPC_URL").unwrap().as_str()
-                )    
+                SolanaClient::connect(dotenvy::var("JSON_RPC_URL").unwrap().as_str())
             )
         )
         .configure(config);

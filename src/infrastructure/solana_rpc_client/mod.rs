@@ -1,9 +1,5 @@
 use solana_program::{
-    hash::Hash,
-    instruction::AccountMeta,
-    native_token::{lamports_to_sol, sol_to_lamports},
-    pubkey::Pubkey,
-    system_program,
+    hash::Hash, instruction::{AccountMeta, Instruction}, native_token::{lamports_to_sol, sol_to_lamports, LAMPORTS_PER_SOL}, pubkey::Pubkey, system_instruction::transfer, system_program
 };
 
 use solana_client::{
@@ -29,7 +25,7 @@ impl SolanaClient {
     pub fn connect(url: &str) -> Self {
         SolanaClient {
             client: RpcClient::new(url),
-            admin: read_keypair_file("./wallets/w1.json").unwrap()
+            admin: read_keypair_file("./wallets/w4.json").unwrap()
         }
     }
 
@@ -42,26 +38,28 @@ impl SolanaClient {
         }
     }
 
-    pub fn send_tx(&self, tx: &Transaction) -> Signature {
-        match self.client.send_transaction(tx) {
-            Ok(sig) => sig,
-            Err(err) => {
-                let e = err.get_transaction_error().unwrap();
-                panic!("Failed to send tx. {:?}", e)
-            }
-        }
-    }
+    pub fn send_tx(
+        &self, 
+        sender: &Keypair,
+        recipient: &Pubkey,
+        sols: f64
+    ) -> Signature {
+        let ix = transfer(
+            &sender.pubkey(),
+            &recipient,
+            (sols * LAMPORTS_PER_SOL as f64) as u64
+        );
+                
+        let tx: Transaction = Transaction::new_signed_with_payer(
+            &[ix],
+            Some(&sender.pubkey()),
+            &[&sender],
+            self.get_latest_hash()
+        );
 
-    pub fn send_tx_without_preflight(&self, tx: &Transaction) -> Signature {
-        let mut config: RpcSendTransactionConfig = RpcSendTransactionConfig::default();
-        config.skip_preflight = true;
-
-        match self.client.send_transaction_with_config(tx, config) {
+        match self.client.send_transaction(&tx) {
             Ok(sig) => sig,
-            Err(err) => {
-                let e = err.get_transaction_error().unwrap();
-                panic!("Failed to send tx. {:?}", e)
-            }
+            Err(err) => panic!("Failed to send tx. {:?}", err.kind())
         }
     }
 
