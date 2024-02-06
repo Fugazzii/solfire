@@ -1,16 +1,11 @@
 use std::str::FromStr;
 
 use actix_web::{get, post, web::{self, Data, Json}, HttpResponse};
-use serde::Deserialize;
 use serde_json::json;
 use solana_program::pubkey::Pubkey;
-use solana_sdk::signer::Signer;
 use tokio::task::spawn_blocking;
 
-use crate::infrastructure::{
-	// database::Database,
-	solana_rpc_client::SolanaClient
-};
+use crate::{application::dtos::SendTxDto, infrastructure::solana_rpc_client::SolanaClient};
 
 #[get("/ping")]
 pub async fn ping() -> HttpResponse {
@@ -21,13 +16,6 @@ pub async fn ping() -> HttpResponse {
 pub async fn recent_hash(rpc: Data<SolanaClient>) -> HttpResponse {
 	let latest_hash = tokio::task::spawn_blocking(move || rpc.get_latest_hash()).await.unwrap();
 	HttpResponse::Ok().body(latest_hash.to_string())
-}
-
-#[derive(Deserialize)]
-struct SendTxDto {
-	sender_keypair_path: String,
-	recipient: String,
-	sols: f64
 }
 
 #[post("/tx")]
