@@ -8,11 +8,13 @@ pub struct Database {
 }
 
 impl Database {
-	pub fn new(database_url: &String) -> Self {
+	pub fn new(database_url: &str) -> DBPool {
 		let manager = ConnectionManager::<PgConnection>::new(database_url);
         let pool: DBPool = r2d2::Pool::builder()
             .build(manager)
             .expect("Failed to create pool.");
-        Database { pool }
+        let instance = Database { pool };
+
+        instance.pool
 	}
 }
