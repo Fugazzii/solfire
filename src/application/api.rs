@@ -16,7 +16,8 @@ use crate::{
 	application::dtos::{
 		AirdropSolDto, PublicKeyQuery, SendTxDto
 	}, 
-	infrastructure::solana_rpc_client::SolanaClient
+	infrastructure::solana_rpc_client::SolanaClient, 
+	presentation::{json_presenter::JsonPresenter, presenter::Presenter}
 };
 
 #[get("/ping")]
@@ -65,27 +66,11 @@ pub async fn get_balance(
 	let pubkey = Pubkey::from_str(query.pubkey.as_str()).unwrap();
 	let result = spawn_blocking(move || rpc.get_balance(&pubkey)).await;
 
-	match result {
-		Ok(balance) => {
-			HttpResponse::Ok()
-				.append_header(header::ContentType::json())
-				.json(json!({
-					"success": true,
-					"message": "Successfully retrieved balance",
-					"data": balance
-				}))
-		},
-		Err(err) => {
-			HttpResponse::NotFound()
-				.append_header(header::ContentType::json())
-				.json(json!({
-					"success": false,
-					"message": "Could not retrieve balance",
-					"error": err.to_string()
-				}))
-		}
-	}
-
+	JsonPresenter::present(
+		result, 
+		"Successfully retrieved balance",
+		"Could not retrieve balance"
+	)
 }
 
 #[post("/tx")]

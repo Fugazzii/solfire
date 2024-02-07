@@ -10,6 +10,9 @@ use infrastructure::{
     // database::Database
 };
 
+pub mod presentation;
+use presentation::json_presenter::JsonPresenter;
+
 const ENV: &str = "./env/.env.dev"; 
 
 
@@ -32,6 +35,7 @@ async fn main() -> std::io::Result<()> {
                 SolanaClient::connect(dotenvy::var("JSON_RPC_URL").unwrap().as_str())
             )
         )
+        .app_data(Data::new(JsonPresenter))
         .configure(config);
 
     HttpServer::new(factory)
