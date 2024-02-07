@@ -1,12 +1,12 @@
 use solana_program::{
-    hash::Hash, instruction::{AccountMeta, Instruction}, native_token::{lamports_to_sol, sol_to_lamports, LAMPORTS_PER_SOL}, pubkey::Pubkey, system_instruction::transfer, system_program
+    hash::Hash, instruction::AccountMeta,
+    native_token::{lamports_to_sol, sol_to_lamports, LAMPORTS_PER_SOL},
+    pubkey::Pubkey, 
+    system_instruction::transfer, 
+    system_program
 };
 
-use solana_client::{
-    rpc_client::RpcClient, 
-    rpc_config::RpcSendTransactionConfig
-};
-
+use solana_client::rpc_client::RpcClient;
 use solana_sdk::{
     signature::{read_keypair_file, write_keypair_file, Keypair, Signature},
     signer::Signer,

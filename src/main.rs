@@ -13,15 +13,17 @@ use infrastructure::{
 pub mod presentation;
 use presentation::json_presenter::JsonPresenter;
 
-const ENV: &str = "./env/.env.dev"; 
+pub mod common;
 
+const ENV: &str = "./env/.env.dev"; 
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
-
     dotenvy::from_path(ENV).ok();
+
+    println!("{}", env_var!("JSON_RPC_UR"));
 
     // let db_url = dotenvy::var("DATABASE_URL").expect("Provide DATABASE_URL");
     let factory = move || App::new()
