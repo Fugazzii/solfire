@@ -26,23 +26,23 @@ impl Presenter for JsonPresenter {
     where T: Deserialize<'a> + serde::ser::Serialize
     {
         HttpResponse::Ok()
-        .append_header(header::ContentType::json())
-        .json(json!({
-            "success": true,
-            "message": message,
-            "data": data
-        }))
+            .append_header(header::ContentType::json())
+            .json(json!({
+                "success": true,
+                "message": message,
+                "data": data
+            }))
     }
 
     fn failure<T>(message: &str, error: T) -> HttpResponse 
     where T: Display
     {
-        HttpResponse::NotFound()
-        .append_header(header::ContentType::json())
-        .json(json!({
-            "success": false,
-            "message": message,
-            "error": error.to_string()
-        }))
+        HttpResponse::InternalServerError()
+            .append_header(header::ContentType::json())
+            .json(json!({
+                "success": false,
+                "message": message,
+                "error": error.to_string()
+            }))
     }
 }

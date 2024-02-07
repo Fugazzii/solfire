@@ -5,7 +5,7 @@ use application::api::config;
 
 pub mod infrastructure;
 use infrastructure::{
-    database::Database, solana_rpc_client::SolanaClient
+    solana_rpc_client::SolanaClient,
     // database::Database
 };
 
@@ -21,7 +21,7 @@ async fn main() -> std::io::Result<()> {
     initialize();
 
     let factory = move || App::new()
-        .app_data(inject!(Database::new(env_var!("DATABASE_URL"))))
+        // .app_data(inject!(Database::new(env_var!("DATABASE_URL"))))
         .app_data(inject!(SolanaClient::connect(env_var!("JSON_RPC_URL"))))
         .app_data(inject!(JsonPresenter))
         .configure(config);

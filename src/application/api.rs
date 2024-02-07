@@ -1,3 +1,4 @@
+use std::fs;
 use std::str::FromStr;
 
 use actix_web::{
@@ -8,7 +9,6 @@ use actix_web::{
 	HttpResponse
 };
 
-use serde_json::json;
 use solana_program::pubkey::Pubkey;
 use tokio::task::spawn_blocking;
 
@@ -22,9 +22,12 @@ use crate::{
 
 #[get("/ping")]
 pub async fn ping() -> HttpResponse {
+	let ping_html_path: &str = "./static/ping.html";
+	let html = fs::read_to_string(ping_html_path).unwrap();
+
 	HttpResponse::Ok()
 		.append_header(header::ContentType::html())
-		.body("<h1>Pong! Server is running 🚀 </h1>")
+		.body(html)
 }
 
 #[get("/recent-hash")]
@@ -33,29 +36,11 @@ pub async fn recent_hash(
 ) -> HttpResponse {
 	let result = spawn_blocking(move || rpc.get_latest_hash()).await;
 
-	match result {
-		Ok(recent_hash) => {
-			HttpResponse::Ok()
-			.append_header(header::ContentType::json())
-			.json(json!({
-				"success": true,
-				"message": "Got recent hash",
-				"data": {
-					"latest_hash": recent_hash.to_string()
-				}
-			}))	
-		},
-		Err(err) => {
-			HttpResponse::NotFound()
-				.append_header(header::ContentType::json())
-				.json(json!({
-					"success": false,
-					"message": "Could not retrieve latest hash",
-					"error": err.to_string()
-				}))
-		}
-	}
-
+	JsonPresenter::present(
+		result, 
+		"Got recent hash",
+		"Could not retrieve latest hash"
+	)
 }
 
 #[get("/balance")]
@@ -78,7 +63,6 @@ pub async fn send_tx(
 	rpc: Data<SolanaClient>,
 	send_tx_dto: Json<SendTxDto>
 ) -> HttpResponse {
-	println!("Sending...");
 	let SendTxDto { sender_keypair_path, recipient, sols } = send_tx_dto.0;
 	let recipient_pk = Pubkey::from_str(&recipient).unwrap();
 	let rpc_clone = rpc.clone();
@@ -87,13 +71,15 @@ pub async fn send_tx(
 		rpc_clone.read_keypair(sender_keypair_path.as_str())
 	}).await.unwrap();
 
-	let signature = spawn_blocking(move || {
+	let result = spawn_blocking(move || {
 		rpc.send_tx(&keypair, &recipient_pk, sols)
-	}).await.unwrap();
+	}).await;
 
-	HttpResponse::Ok().json(json!({
-		"signature": signature
-	}))
+	JsonPresenter::present(
+		result,
+		"Successfully performed transaction",
+		"Failed to perform transaction"
+	)
 }
 
 #[post("/airdrop")]
@@ -105,28 +91,11 @@ pub async fn airdrop(
 	let pubkey = Pubkey::from_str(&recipient).unwrap();
 	let result = spawn_blocking(move || rpc.airdrop(&pubkey, sols)).await;
 
-	match result {
-		Ok(signature) => {
-			HttpResponse::Ok()
-				.append_header(header::ContentType::json())
-				.json(json!({
-					"success": true,
-					"message": format!("Airdropped {} SOL", sols),
-					"data": {
-						"signature": signature
-					}
-				}))
-		},
-		Err(err) => {
-			HttpResponse::NotFound()
-				.append_header(header::ContentType::json())
-				.json(json!({
-					"success": false,
-					"message": "Could not retrieve balance",
-					"error": err.to_string()
-				}))
-		}
-	}
+	JsonPresenter::present(
+		result,
+		format!("Airdropped {} SOL", sols).as_str(),
+		"Could not retrieve balance"
+	)
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {
