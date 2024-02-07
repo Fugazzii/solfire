@@ -23,18 +23,15 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
     dotenvy::from_path(ENV).ok();
 
-    println!("{}", env_var!("JSON_RPC_UR"));
-
-    // let db_url = dotenvy::var("DATABASE_URL").expect("Provide DATABASE_URL");
     let factory = move || App::new()
         // .app_data(
-        //     Data::new(
-        //         Database::new(&db_url).pool
+        //     inject!(
+        //         Database::new(env_var!("DATABASE_URL")).pool
         //     )
         // )
         .app_data(
-            Data::new(
-                SolanaClient::connect(dotenvy::var("JSON_RPC_URL").unwrap().as_str())
+            inject!(
+                SolanaClient::connect(env_var!("JSON_RPC_URL"))
             )
         )
         .app_data(Data::new(JsonPresenter))
