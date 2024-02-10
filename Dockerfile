@@ -1,12 +1,8 @@
 FROM rust:slim
 
-WORKDIR /app
-
-COPY Cargo.toml .
-RUN cargo build --release
+WORKDIR /usr/src/app
 
 COPY . .
+RUN cargo build --release
 
-EXPOSE 3000
-
-CMD ["cargo", "run"]
+CMD ["/usr/src/app/target/debug/solfire"]
