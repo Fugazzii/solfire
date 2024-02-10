@@ -34,7 +34,7 @@ pub async fn ping() -> HttpResponse {
 pub async fn recent_hash(
 	rpc: Data<SolanaClient>
 ) -> HttpResponse {
-	let result = spawn_blocking(move || rpc.get_latest_hash()).await;
+	let result = spawn_blocking(move || rpc.get_latest_hash_base64()).await;
 
 	JsonPresenter::present(
 		result, 

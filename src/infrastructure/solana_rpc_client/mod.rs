@@ -64,8 +64,13 @@ impl SolanaClient {
     }
 
     pub fn get_latest_hash(&self) -> Hash {
-        let c: Hash = self.client.get_latest_blockhash().unwrap();
-        c
+        let hash: Hash = self.client.get_latest_blockhash().unwrap();
+        hash
+    }
+
+    pub fn get_latest_hash_base64(&self) -> String {
+       let hash_base64 = self.client.get_latest_blockhash().unwrap().to_string();
+        hash_base64
     }
 
     pub fn get_balance(&self, pubkey: &Pubkey) -> f64 {
