@@ -27,7 +27,7 @@ async fn main() -> std::io::Result<()> {
         .configure(config);
 
     HttpServer::new(factory)
-        .bind(("localhost", 3000))
+        .bind(("0.0.0.0", 3000))
         .unwrap()
         .run()
         .await
